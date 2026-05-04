@@ -6,6 +6,7 @@ public class PlayerController : MonoBehaviour
     private InputSystem_Actions _inputActions;
 
     private Vector2 _moveInput;
+    private Vector2 _rotateInput;
     private Rigidbody rb;
 
     void Awake()
@@ -16,7 +17,8 @@ public class PlayerController : MonoBehaviour
         _inputActions.Player.Move.performed += OnMove;
         _inputActions.Player.Move.canceled += OnMove;
         _inputActions.Player.Jump.performed += OnJump;
-        _inputActions.Player.Jump.canceled += OnJump;
+        _inputActions.Player.Look.performed += OnLook;
+        _inputActions.Player.Look.canceled += OnLook;
     }
 
     private void OnEnable()
@@ -32,6 +34,7 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         MovePlayer();
+        PlayerLook();
     }
 
     private void MovePlayer()
@@ -39,6 +42,17 @@ public class PlayerController : MonoBehaviour
         Vector3 movement = new Vector3(_moveInput.x, 0, _moveInput.y);
 
         transform.Translate(movement * 5 * Time.deltaTime);
+    }
+
+    private void PlayerLook()
+    {
+        Vector2 rotation = _rotateInput * 0.2f;
+        transform.Rotate(0,rotation.x, 0);
+    }
+
+    public void OnLook(InputAction.CallbackContext context)
+    {
+        _rotateInput = context.ReadValue<Vector2>();
     }
 
     public void OnMove(InputAction.CallbackContext context)
