@@ -7,12 +7,14 @@ public class PlayerController : MonoBehaviour
 
     private Vector2 _moveInput;
     private Vector2 _rotateInput;
-    private Rigidbody rb;
+    private Rigidbody _rb;
+    private Collider _col;
 
     void Awake()
     {
         _inputActions = new InputSystem_Actions();
-        rb = GetComponent<Rigidbody>();
+        _rb = GetComponent<Rigidbody>();
+        _col = GetComponent<Collider>();
 
         _inputActions.Player.Move.performed += OnMove;
         _inputActions.Player.Move.canceled += OnMove;
@@ -62,6 +64,17 @@ public class PlayerController : MonoBehaviour
 
     public void OnJump(InputAction.CallbackContext context)
     {
-        rb.AddForce(0,4,0, ForceMode.Impulse);
+        if(GetIsGrounded())
+            _rb.AddForce(0,4,0, ForceMode.Impulse);
     }
+
+    private bool GetIsGrounded()
+    {
+        return Physics.Raycast(
+        transform.position, 
+        Vector3.down, 
+        _col.bounds.extents.y + 0.05f, 
+        LayerMask.GetMask("Ground"));
+    }
+
 }
