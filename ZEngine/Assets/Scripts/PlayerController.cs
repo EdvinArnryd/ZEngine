@@ -1,14 +1,24 @@
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
     private InputSystem_Actions _inputActions;
-
     private Vector2 _moveInput;
     private Vector2 _rotateInput;
     private Rigidbody _rb;
     private Collider _col;
+
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = new Color(0.75f, 0.0f, 0.0f, 0.75f);
+
+        // Convert the local coordinate values into world
+        // coordinates for the matrix transformation.
+        _col = GetComponent<Collider>();
+        Gizmos.DrawRay(transform.position, Vector3.down * _col.bounds.extents.y/10);
+    }
 
     void Awake()
     {
@@ -37,6 +47,8 @@ public class PlayerController : MonoBehaviour
     {
         MovePlayer();
         PlayerLook();
+
+        Debug.DrawRay(transform.position, Vector3.down, Color.blue);
     }
 
     private void MovePlayer()
@@ -72,8 +84,8 @@ public class PlayerController : MonoBehaviour
     {
         return Physics.Raycast(
         transform.position, 
-        Vector3.down, 
-        _col.bounds.extents.y + 0.05f, 
+        Vector3.down,
+        _col.bounds.extents.y/10, 
         LayerMask.GetMask("Ground"));
     }
 
