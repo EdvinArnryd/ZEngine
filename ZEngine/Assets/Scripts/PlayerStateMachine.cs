@@ -1,7 +1,8 @@
 using UnityEditor.Animations;
 using UnityEngine;
+using UnityEngine.TextCore.Text;
 
-public enum PlayerState
+public enum State
 {
     IDLE,
     WALKING,
@@ -16,18 +17,25 @@ public enum PlayerState
 public class PlayerStateMachine : MonoBehaviour
 {
     private Animator _animator; 
-    private PlayerState _newState;
-    private PlayerState _oldState;
+    private State _currentState;
+    private State _oldState;
+    private PlayerController _playerController;
+
 
     void Awake()
     {
         _animator = GetComponent<Animator>();
+        _playerController = GetComponent<PlayerController>();
     }
 
     void Start()
     {
-        _newState = PlayerState.IDLE;
-        _oldState = PlayerState.NONE;
+        _currentState = State.IDLE;
+        _oldState = State.NONE;
+
+        _playerController.OnRunning = SetRunning;
+        _playerController.OnBacking = SetBacking;
+        _playerController.OnJumping = SetJumping;
     }
 
     void Update()
@@ -35,29 +43,59 @@ public class PlayerStateMachine : MonoBehaviour
         UpdateAnimations();
     }
 
+    private void SetRunning()
+    {
+        _currentState = State.RUNNING;
+    }
+
+    private void SetBacking()
+    {
+        _currentState = State.BACKING;
+    }
+
+    private void SetIdle()
+    {
+        _currentState = State.IDLE;
+    }
+
+    private void SetJumping()
+    {
+        _currentState = State.JUMPING;
+    }
+
+    private void SetFalling()
+    {
+        
+    }
+
+    private void SetLanding()
+    {
+        
+    }
+
     private void UpdateAnimations()
     {
-        if(_newState == _oldState) return;
-        print("Going into Animations");
-        _oldState = _newState;
-        switch(_newState)
+        if(_currentState == _oldState) return;
+        _oldState = _currentState;
+        
+        switch(_currentState)
         {
-            case PlayerState.IDLE:
+            case State.IDLE:
                 _animator.CrossFadeInFixedTime("Idle", 0.25f);
                 break;
-            case PlayerState.RUNNING:
-                _animator.CrossFadeInFixedTime("Running", 0.25f);
+            case State.RUNNING:
+                _animator.CrossFadeInFixedTime("Run", 0.25f);
                 break;
-            case PlayerState.JUMPING:
-                _animator.CrossFadeInFixedTime("Jumping", 0.25f);
+            case State.JUMPING:
+                _animator.CrossFadeInFixedTime("Jump", 0.25f);
                 break;
-            case PlayerState.FALLING:
+            case State.FALLING:
                 _animator.CrossFadeInFixedTime("Falling", 0.25f);
                 break;
-            case PlayerState.LANDING:
+            case State.LANDING:
                 _animator.CrossFadeInFixedTime("Landing", 0.25f);
                 break;
-            case PlayerState.BACKING:
+            case State.BACKING:
                 _animator.CrossFadeInFixedTime("Backing", 0.25f);
                 break;
         }

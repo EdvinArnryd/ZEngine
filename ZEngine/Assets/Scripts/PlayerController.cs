@@ -1,3 +1,4 @@
+using System;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -10,6 +11,14 @@ public class PlayerController : MonoBehaviour
     private Rigidbody _rb;
     private Collider _col;
 
+    public float _divider = 5;
+
+    #region Player Controller Events
+    public Action OnRunning;
+    public Action OnBacking;
+    public Action OnJumping;
+    #endregion
+
     void OnDrawGizmosSelected()
     {
         Gizmos.color = new Color(0.75f, 0.0f, 0.0f, 0.75f);
@@ -17,7 +26,7 @@ public class PlayerController : MonoBehaviour
         // Convert the local coordinate values into world
         // coordinates for the matrix transformation.
         _col = GetComponent<Collider>();
-        Gizmos.DrawRay(transform.position, Vector3.down * _col.bounds.extents.y/10);
+        Gizmos.DrawRay(transform.position + new Vector3(0,0.5f,0), Vector3.down * _divider);
     }
 
     void Awake()
@@ -45,10 +54,13 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        MovePlayer();
         PlayerLook();
 
         Debug.DrawRay(transform.position, Vector3.down, Color.blue);
+
+        MovePlayer();
+
+        print(GetIsGrounded());
     }
 
     private void MovePlayer()
@@ -72,20 +84,31 @@ public class PlayerController : MonoBehaviour
     public void OnMove(InputAction.CallbackContext context)
     {
         _moveInput = context.ReadValue<Vector2>();
+        if(_moveInput.y < -0.5)
+        {
+            OnBacking.Invoke();
+        }
+        else if(_moveInput.y > 0.5 || _moveInput.x > 0.5 ||_moveInput.y < -0.5)
+        {
+            OnRunning.Invoke();
+        }
     }
 
     public void OnJump(InputAction.CallbackContext context)
     {
         if(GetIsGrounded())
-            _rb.AddForce(0,4,0, ForceMode.Impulse);
+        {
+            _rb.AddForce(0,6,0, ForceMode.Impulse);
+            OnJumping.Invoke();
+        }
     }
 
     private bool GetIsGrounded()
     {
         return Physics.Raycast(
-        transform.position, 
-        Vector3.down,
-        _col.bounds.extents.y/10, 
+        transform.position + new Vector3(0,0.5f,0), 
+        Vector3.down, 
+        _divider,
         LayerMask.GetMask("Ground"));
     }
 
