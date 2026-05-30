@@ -59,8 +59,6 @@ public class PlayerController : MonoBehaviour
         Debug.DrawRay(transform.position, Vector3.down, Color.blue);
 
         MovePlayer();
-
-        print(GetIsGrounded());
     }
 
     private void MovePlayer()
