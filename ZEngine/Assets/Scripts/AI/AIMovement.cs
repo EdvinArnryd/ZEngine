@@ -7,14 +7,14 @@ using UnityEngine.AI;
 
 public class AIMovement : MonoBehaviour
 {
-    [SerializeField] private List<GameObject> _destinations;
+    private Vector3[] _destinations;
     private int _currentDestinationIndex = 0;
     private NavMeshAgent _agent;
 
     #region Movement Variables
-    [SerializeField] private float _walkingSpeed = 5f;
+    [SerializeField] private float _walkingSpeed = 10f;
     [SerializeField] private float _chasingSpeed = 10f;
-    [SerializeField] private float _idleDuration = 4f;
+    [SerializeField] private float _idleDuration = 1f;
     [SerializeField] private float _destinationRange = 5f;
 
     #endregion
@@ -24,11 +24,22 @@ public class AIMovement : MonoBehaviour
     {
         _agent = GetComponent<NavMeshAgent>();
         _agent.speed = _walkingSpeed;
+        _destinations = new Vector3[transform.childCount];
     }
 
     void Start()
     {
         StartCoroutine(WalkToDestination());
+
+        GetChildrenPositions();
+    }
+
+    private void GetChildrenPositions()
+    {
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            _destinations[i] = transform.GetChild(i).position;
+        }
     }
 
     IEnumerator WalkToDestination()
@@ -50,12 +61,12 @@ public class AIMovement : MonoBehaviour
 
     private void SetAgentDestination()
     {
-        _agent.SetDestination(_destinations[_currentDestinationIndex].transform.position);
+        _agent.SetDestination(_destinations[_currentDestinationIndex]);
     }
 
     private void GetNewDestination()
     {
-        if(_currentDestinationIndex + 1 >= _destinations.Count)
+        if(_currentDestinationIndex + 1 >= _destinations.Length)
         {
             _currentDestinationIndex = 0;
             return;
@@ -65,6 +76,6 @@ public class AIMovement : MonoBehaviour
 
     private bool GetDestinationInRange()
     {
-        return Vector3.Distance(_destinations[_currentDestinationIndex].transform.position, transform.position) > _destinationRange;
+        return Vector3.Distance(_destinations[_currentDestinationIndex], transform.position) > _destinationRange;
     }
 }
